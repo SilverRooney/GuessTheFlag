@@ -21,6 +21,9 @@ struct ContentView: View {
    @State private var countries = ["Estonia", "France", "Germany", "Ireland", "Italy", "Nigeria", "Poland", "Russia", "Spain", "UK", "US"].shuffled()
    @State private var correctAnswer = Int.random(in: 0...2)
     
+    @State private var buttonOpacity = 0.0
+    @State private var rotationAmount = 0.0
+    
     var body: some View {
         ZStack {
             RadialGradient(stops: [
@@ -48,15 +51,16 @@ struct ContentView: View {
         }
         
         ForEach(0..<3) { number in
-            Button {
-                flagTapped(number)
-            } label: {
-                Image(countries[number])
-                    .renderingMode(.original)
-                    .clipShape(Capsule())
-                    .shadow(radius: 5)
+            Button(action:  {
+                withAnimation{
+                    self.flagTapped(number)
+                }
+            })  {
+                FlagImage(of: countries[number])
                 
             }
+            .rotation3DEffect(.degrees(number == self.correctAnswer ? rotationAmount : 0.0), axis: (x: 0, y: 1, z: 0))
+          //  .opacity(number != correctAnswer ? buttonOpacity : 1.0)
         }
             
         
@@ -95,8 +99,14 @@ struct ContentView: View {
             if number == correctAnswer {
                 scoreTitle = "Correct"
                 userScore += 1
+                rotationAmount = 360
+                
             } else {
                 scoreTitle = "Wrong, that´s not the flag of \(countries[correctAnswer])"
+            }
+            
+            withAnimation(.easeInOut) {
+                
             }
             
             showingScore = true
@@ -107,6 +117,7 @@ struct ContentView: View {
         countries.shuffle()
         correctAnswer = Int.random(in: 0...2)
         questionCount += 1
+        rotationAmount = 0
         } else {
             gameOver = true
         }
@@ -118,6 +129,22 @@ struct ContentView: View {
     }
     
     }
+
+struct FlagImage: View {
+    var country: String
+    
+    init(of country: String) {
+        self.country = country
+    }
+    
+    var body: some View {
+        Image(country)
+            .renderingMode(.original)
+            .clipShape(Capsule())
+            .shadow(radius: 5)
+    }
+}
+
 
 
 struct ContentView_Previews: PreviewProvider {
